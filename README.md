@@ -1,40 +1,87 @@
-# Terraform Provider Scaffolding (Terraform Plugin Framework)
+# Graylog Terraform Provider
 
-_This template repository is built on the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework). The template repository built on the [Terraform Plugin SDK](https://github.com/hashicorp/terraform-plugin-sdk) can be found at [terraform-provider-scaffolding](https://github.com/hashicorp/terraform-provider-scaffolding). See [Which SDK Should I Use?](https://developer.hashicorp.com/terraform/plugin/framework-benefits) in the Terraform documentation for additional information._
-
-This repository is a *template* for a [Terraform](https://www.terraform.io) provider. It is intended as a starting point for creating Terraform providers, containing:
-
-- A resource and a data source (`internal/provider/`),
-- Examples (`examples/`) and generated documentation (`docs/`),
-- Miscellaneous meta files.
-
-These files contain boilerplate code that you will need to edit to create your own Terraform provider. Tutorials for creating Terraform providers can be found on the [HashiCorp Developer](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework) platform. _Terraform Plugin Framework specific guides are titled accordingly._
-
-Please see the [GitHub template repository documentation](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template) for how to create a new repository from this template on GitHub.
-
-Once you've written your provider, you'll want to [publish it on the Terraform Registry](https://developer.hashicorp.com/terraform/registry/providers/publishing) so that others can use it.
+A Terraform provider for managing Graylog resources.
 
 ## Requirements
 
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
-- [Go](https://golang.org/doc/install) >= 1.24
+- [Go](https://golang.org/doc/install) >= 1.21
+- Graylog >= 7.0
 
 ## Building The Provider
 
-1. Clone the repository
-1. Enter the repository directory
-1. Build the provider using the Go `install` command:
+The provider binary must be named in the format `terraform-provider-{TYPE}_v{VERSION}.exe` for Terraform to discover it.
+
+### Using the build script (Linux/macOS/Git Bash)
 
 ```shell
-go install
+./build.sh
 ```
+
+### Using the build script (Windows CMD/PowerShell)
+
+```shell
+build.bat
+```
+
+### Manual build
+
+```shell
+go build -o $GOPATH/bin/terraform-provider-kaizen_v0.0.1.exe .
+```
+
+The binary will be placed in `$GOPATH/bin/terraform-provider-kaizen_v0.0.1.exe`.
+
+## Installing the Provider for Local Development
+
+1. Build the provider using one of the methods above
+
+2. Configure Terraform to use the local provider by creating/updating `~/.terraformrc` (Linux/macOS) or `%APPDATA%/terraform.rc` (Windows):
+
+```hcl
+provider_installation {
+  dev_overrides {
+    "graylog.com/edu/kaizen" = "C:/Users/YOUR_USERNAME/go/bin"
+  }
+  direct {}
+}
+```
+
+Replace `YOUR_USERNAME` with your actual username.
+
+## Using the Provider
+
+```hcl
+terraform {
+  required_providers {
+    graylog = {
+      source = "graylog.com/edu/kaizen"
+    }
+  }
+}
+
+provider "graylog" {
+  web_endpoint_uri = "http://localhost:9000"
+  auth_name        = "admin"
+  auth_password    = "your-password"
+}
+
+# Fetch an event definition
+data "graylog_event_definition" "example" {
+  id = "your-event-definition-id"
+}
+```
+
+## Available Data Sources
+
+- `graylog_event_definition` - Fetch event definitions by ID or title
+- `graylog_event_notification` - Fetch event notifications by ID or title
 
 ## Adding Dependencies
 
 This provider uses [Go modules](https://github.com/golang/go/wiki/Modules).
-Please see the Go documentation for the most up to date information about using Go modules.
 
-To add a new dependency `github.com/author/dependency` to your Terraform provider:
+To add a new dependency:
 
 ```shell
 go get github.com/author/dependency
@@ -42,10 +89,6 @@ go mod tidy
 ```
 
 Then commit the changes to `go.mod` and `go.sum`.
-
-## Using the provider
-
-Fill this in for each provider
 
 ## Developing the Provider
 
@@ -57,7 +100,7 @@ To generate or update documentation, run `make generate`.
 
 In order to run the full suite of Acceptance tests, run `make testacc`.
 
-*Note:* Acceptance tests create real resources, and often cost money to run.
+_Note:_ Acceptance tests create real resources, and often cost money to run.
 
 ```shell
 make testacc

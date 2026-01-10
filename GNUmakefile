@@ -1,10 +1,22 @@
 default: fmt lint install generate
 
+# Provider name and version
+PROVIDER_NAME=kaizen
+VERSION=0.0.1
+BINARY_NAME=terraform-provider-$(PROVIDER_NAME)_v$(VERSION)
+
+# Determine OS-specific binary extension
+ifeq ($(OS),Windows_NT)
+	BINARY_EXT=.exe
+else
+	BINARY_EXT=
+endif
+
 build:
 	go build -v ./...
 
 install: build
-	go install -v ./...
+	go build -o $(GOPATH)/bin/$(BINARY_NAME)$(BINARY_EXT) .
 
 lint:
 	golangci-lint run

@@ -1,162 +1,159 @@
 package client
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
-
-	"github.com/suzuki-shunsuke/go-httpclient/httpclient"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/dashboard"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/dashboard/position"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/dashboard/widget"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/event/definition"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/event/notification"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/role"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/sidecar"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/sidecar/collector"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/sidecar/configuration"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/stream"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/stream/alarmcallback"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/stream/alert/condition"
-	streamOutput "github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/stream/output"
-	streamRule "github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/stream/rule"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/grok"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/indices/indexset"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/input"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/input/extractor"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/input/staticfield"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/ldap/setting"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/output"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/pipeline/connection"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/pipeline/pipeline"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/system/pipeline/rule"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/user"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/client/view"
-	"github.com/terraform-provider-graylog/terraform-provider-graylog/graylog/config"
+	"time"
 )
 
+// Client represents a Graylog API client
 type Client struct {
-	APIVersion              string
-	AlarmCallback           alarmcallback.Client
-	AlertCondition          condition.Client
-	Collector               collector.Client
-	Dashboard               dashboard.Client
-	DashboardWidget         widget.Client
-	DashboardWidgetPosition position.Client
-	EventDefinition         definition.Client
-	EventNotification       notification.Client
-	Extractor               extractor.Client
-	Grok                    grok.Client
-	IndexSet                indexset.Client
-	Input                   input.Client
-	InputStaticField        staticfield.Client
-	LDAPSetting             setting.Client
-	Output                  output.Client
-	Pipeline                pipeline.Client
-	PipelineConnection      connection.Client
-	PipelineRule            rule.Client
-	Role                    role.Client
-	Sidecar                 sidecar.Client
-	SidecarConfiguration    configuration.Client
-	Stream                  stream.Client
-	StreamOutput            streamOutput.Client
-	StreamRule              streamRule.Client
-	View                    view.Client
-	User                    user.Client
+	BaseURL      string
+	Username     string
+	Password     string
+	HTTPClient   *http.Client
+	XRequestedBy string
+	APIVersion   string
 }
 
-func New(m interface{}) (Client, error) {
-	cfg := m.(config.Config)
-
-	httpClient := httpclient.New(cfg.Endpoint)
-	xRequestedBy := cfg.XRequestedBy
-	if xRequestedBy == "" {
-		xRequestedBy = "terraform-provider-graylog"
+// NewClient creates a new Graylog client
+func NewClient(baseURL, username, password *string) (*Client, error) {
+	if baseURL == nil || *baseURL == "" {
+		return nil, fmt.Errorf("base URL is required")
 	}
-	httpClient.SetRequest = func(req *http.Request) error {
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("X-Requested-By", xRequestedBy)
-		req.SetBasicAuth(cfg.AuthName, cfg.AuthPassword)
-		return nil
+	if username == nil || *username == "" {
+		return nil, fmt.Errorf("username is required")
+	}
+	if password == nil || *password == "" {
+		return nil, fmt.Errorf("password is required")
 	}
 
-	return Client{
-		APIVersion: cfg.APIVersion,
-		AlarmCallback: alarmcallback.Client{
-			Client: httpClient,
+	return &Client{
+		BaseURL:  *baseURL,
+		Username: *username,
+		Password: *password,
+		HTTPClient: &http.Client{
+			Timeout: time.Second * 30,
 		},
-		AlertCondition: condition.Client{
-			Client: httpClient,
-		},
-		Collector: collector.Client{
-			Client: httpClient,
-		},
-		Dashboard: dashboard.Client{
-			Client: httpClient,
-		},
-		DashboardWidget: widget.Client{
-			Client: httpClient,
-		},
-		DashboardWidgetPosition: position.Client{
-			Client: httpClient,
-		},
-		EventDefinition: definition.Client{
-			Client: httpClient,
-		},
-		EventNotification: notification.Client{
-			Client: httpClient,
-		},
-		Extractor: extractor.Client{
-			Client: httpClient,
-		},
-		Grok: grok.Client{
-			Client: httpClient,
-		},
-		IndexSet: indexset.Client{
-			Client: httpClient,
-		},
-		Input: input.Client{
-			Client: httpClient,
-		},
-		InputStaticField: staticfield.Client{
-			Client: httpClient,
-		},
-		LDAPSetting: setting.Client{
-			Client: httpClient,
-		},
-		Output: output.Client{
-			Client: httpClient,
-		},
-		Pipeline: pipeline.Client{
-			Client: httpClient,
-		},
-		PipelineConnection: connection.Client{
-			Client: httpClient,
-		},
-		PipelineRule: rule.Client{
-			Client: httpClient,
-		},
-		Role: role.Client{
-			Client: httpClient,
-		},
-		Sidecar: sidecar.Client{
-			Client: httpClient,
-		},
-		SidecarConfiguration: configuration.Client{
-			Client: httpClient,
-		},
-		Stream: stream.Client{
-			Client: httpClient,
-		},
-		StreamOutput: streamOutput.Client{
-			Client: httpClient,
-		},
-		StreamRule: streamRule.Client{
-			Client: httpClient,
-		},
-		View: view.Client{
-			Client: httpClient,
-		},
-		User: user.Client{
-			Client: httpClient,
-		},
+		XRequestedBy: "terraform-provider-graylog",
+		APIVersion:   "v3", // Default to v3, can be overridden
 	}, nil
+}
+
+// SetXRequestedBy sets the X-Requested-By header value
+func (c *Client) SetXRequestedBy(value string) {
+	c.XRequestedBy = value
+}
+
+// SetAPIVersion sets the API version
+func (c *Client) SetAPIVersion(version string) {
+	c.APIVersion = version
+}
+
+// doRequest performs an HTTP request with authentication
+func (c *Client) doRequest(method, endpoint string, body interface{}) (*http.Response, error) {
+	var reqBody io.Reader
+
+	if body != nil {
+		jsonData, err := json.Marshal(body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal request body: %w", err)
+		}
+		reqBody = bytes.NewBuffer(jsonData)
+	}
+
+	url := fmt.Sprintf("%s/api/%s", c.BaseURL, endpoint)
+	req, err := http.NewRequest(method, url, reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	if c.XRequestedBy != "" {
+		req.Header.Set("X-Requested-By", c.XRequestedBy)
+	}
+
+	// Set basic authentication
+	req.SetBasicAuth(c.Username, c.Password)
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute request: %w", err)
+	}
+
+	// Check for HTTP errors
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	return resp, nil
+}
+
+// Get performs a GET request
+func (c *Client) Get(endpoint string, result interface{}) error {
+	resp, err := c.doRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if result != nil {
+		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+			return fmt.Errorf("failed to decode response: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// Post performs a POST request
+func (c *Client) Post(endpoint string, body interface{}, result interface{}) error {
+	resp, err := c.doRequest(http.MethodPost, endpoint, body)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if result != nil {
+		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+			return fmt.Errorf("failed to decode response: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// Put performs a PUT request
+func (c *Client) Put(endpoint string, body interface{}, result interface{}) error {
+	resp, err := c.doRequest(http.MethodPut, endpoint, body)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if result != nil {
+		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+			return fmt.Errorf("failed to decode response: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// Delete performs a DELETE request
+func (c *Client) Delete(endpoint string) error {
+	resp, err := c.doRequest(http.MethodDelete, endpoint, nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
 }
