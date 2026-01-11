@@ -4,9 +4,9 @@ import (
     "context"
     "os"
 
-    "graylog-kaizen-provider/graylog/client"
-    graylogds "graylog-kaizen-provider/graylog/datasource"
-    graylogres "graylog-kaizen-provider/graylog/resource"
+    "terraform-provider-graylog/graylog/client"
+    graylogds "terraform-provider-graylog/graylog/datasource"
+    graylogres "terraform-provider-graylog/graylog/resource"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/path"
     "github.com/hashicorp/terraform-plugin-framework/provider"
@@ -58,27 +58,27 @@ func (p *graylogProvider) Metadata(_ context.Context, _ provider.MetadataRequest
 // Schema defines the provider-level schema for configuration data.
 func (p *graylogProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
     resp.Schema = schema.Schema{
-        Description: "The Graylog provider is used to interact with Graylog resources.",
+        MarkdownDescription: "The Graylog provider is used to interact with Graylog resources.",
         Attributes: map[string]schema.Attribute{
             "web_endpoint_uri": schema.StringAttribute{
-                Description: "The base URL for the Graylog web interface (e.g., https://graylog.example.com). Can also be set via GRAYLOG_WEB_ENDPOINT_URI environment variable.",
+                MarkdownDescription: "The base URL for the Graylog web interface (e.g., `https://graylog.example.com`). Can also be set via `GRAYLOG_WEB_ENDPOINT_URI` environment variable.",
                 Required:    true,
             },
             "auth_name": schema.StringAttribute{
-                Description: "The username for authenticating with the Graylog API. Can also be set via GRAYLOG_AUTH_NAME environment variable.",
+                MarkdownDescription: "The username for authenticating with the Graylog API. Can also be set via `GRAYLOG_AUTH_NAME` environment variable.",
                 Required:    true,
             },
             "auth_password": schema.StringAttribute{
-                Description: "The password for authenticating with the Graylog API. Can also be set via GRAYLOG_AUTH_PASSWORD environment variable.",
+                MarkdownDescription: "The password for authenticating with the Graylog API. Can also be set via `GRAYLOG_AUTH_PASSWORD` environment variable.",
                 Required:    true,
                 Sensitive:   true,
             },
             "x_requested_by": schema.StringAttribute{
-                Description: "Custom value for the X-Requested-By header. Can also be set via GRAYLOG_X_REQUESTED_BY environment variable. Defaults to 'terraform-provider-graylog'.",
+                MarkdownDescription: "Custom value for the X-Requested-By header. Can also be set via `GRAYLOG_X_REQUESTED_BY` environment variable. Defaults to `terraform-provider-graylog`.",
                 Optional:    true,
             },
             "api_version": schema.StringAttribute{
-                Description: "The Graylog API version to use. Can also be set via GRAYLOG_API_VERSION environment variable. Defaults to 'v3'.",
+                MarkdownDescription: "The Graylog API version to use. Can also be set via `GRAYLOG_API_VERSION` environment variable. Defaults to `v3`.",
                 Optional:    true,
             },
         },

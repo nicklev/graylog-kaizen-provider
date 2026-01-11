@@ -1,0 +1,6 @@
+# Configuration for terraform-plugin-docs
+# See https://github.com/hashicorp/terraform-plugin-docs
+
+# Specify the provider name explicitly
+provider-name: graylog
+

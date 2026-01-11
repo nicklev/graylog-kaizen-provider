@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"graylog-kaizen-provider/graylog/client"
+	"terraform-provider-graylog/graylog/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"

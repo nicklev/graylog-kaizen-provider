@@ -1,4 +1,4 @@
-module graylog-kaizen-provider
+module terraform-provider-graylog
 
 go 1.25.5
 

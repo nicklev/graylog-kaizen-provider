@@ -10,7 +10,7 @@ import (
 
     "github.com/hashicorp/terraform-plugin-framework/providerserver"
 
-    "graylog-kaizen-provider/graylog/provider"
+    "terraform-provider-graylog/graylog/provider"
 )
 
 

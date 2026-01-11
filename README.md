@@ -72,10 +72,17 @@ data "graylog_event_definition" "example" {
 }
 ```
 
+## Available Resources
+
+- `graylog_input` - Manage Graylog inputs (Syslog, GELF, Beats, etc.)
+- `graylog_index_set` - Manage index sets with rotation and retention strategies
+- `graylog_event_definition` - Manage event definitions
+- `graylog_event_notification` - Manage event notifications (HTTP, Slack, Email, etc.)
+
 ## Available Data Sources
 
-- `graylog_event_definition` - Fetch event definitions by ID or title
-- `graylog_event_notification` - Fetch event notifications by ID or title
+- `graylog_event_definition` - Read event definitions by ID or title
+- `graylog_event_notification` - Read event notifications by ID or title
 
 ## Adding Dependencies
 
@@ -96,7 +103,44 @@ If you wish to work on the provider, you'll first need [Go](http://www.golang.or
 
 To compile the provider, run `go install`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
-To generate or update documentation, run `make generate`.
+## Generating Documentation
+
+Documentation for the Terraform Registry is automatically generated from:
+
+1. **Schema Descriptions**: Provider, resource, and data source schemas in the Go code
+2. **Examples**: Terraform configuration files in the `examples/` directory
+3. **Documentation Templates**: Markdown files in the `docs/` directory
+
+### Generate Documentation
+
+To generate or update the documentation, install [terraform-plugin-docs](https://github.com/hashicorp/terraform-plugin-docs):
+
+```shell
+go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+```
+
+Then run:
+
+```shell
+tfplugindocs generate
+```
+
+Or if you have Make installed:
+
+```shell
+make docs
+```
+
+The generated documentation will be placed in the `docs/` directory and is ready for publication to the Terraform Registry.
+
+### Documentation Structure
+
+- `docs/index.md` - Provider documentation
+- `docs/resources/<resource_name>.md` - Resource documentation
+- `docs/data-sources/<data_source_name>.md` - Data source documentation
+- `examples/` - Example Terraform configurations used in documentation
+
+## Testing
 
 In order to run the full suite of Acceptance tests, run `make testacc`.
 

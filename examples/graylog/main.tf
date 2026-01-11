@@ -37,14 +37,10 @@ output "event_definition_description" {
   value = data.graylog_event_definition.example_by_id.description
 }
 
-output "event_definition_state" {
-  value = data.graylog_event_definition.example_by_id.state
-}
-
 output "event_definition_priority" {
   value = data.graylog_event_definition.example_by_id.priority
 }
 
-output "event_definition_alert" {
-  value = data.graylog_event_definition.example_by_id.alert
+output "event_definition_config_type" {
+  value = data.graylog_event_definition.example_by_id.config_type
 }

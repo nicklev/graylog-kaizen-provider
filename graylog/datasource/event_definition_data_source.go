@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"graylog-kaizen-provider/graylog/client"
+	"terraform-provider-graylog/graylog/client"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -64,40 +64,40 @@ func (d *eventDefinitionDataSource) Metadata(_ context.Context, req datasource.M
 // Schema defines the schema for the data source.
 func (d *eventDefinitionDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Fetches information about a specific Graylog event definition.",
+		MarkdownDescription: "Fetches information about a specific Graylog event definition.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "The unique identifier of the event definition. Either 'id' or 'title' must be provided.",
+				MarkdownDescription: "The unique identifier of the event definition. Either `id` or `title` must be provided.",
 				Optional:    true,
 				Computed:    true,
 			},
 			"title": schema.StringAttribute{
-				Description: "The title of the event definition. Either 'id' or 'title' must be provided.",
+				MarkdownDescription: "The title of the event definition. Either `id` or `title` must be provided.",
 				Optional:    true,
 				Computed:    true,
 			},
 			"description": schema.StringAttribute{
-				Description: "The description of the event definition.",
+				MarkdownDescription: "The description of the event definition.",
 				Computed:    true,
 			},
 			"priority": schema.Int64Attribute{
-				Description: "The priority level of the event definition.",
+				MarkdownDescription: "The priority level of the event definition.",
 				Computed:    true,
 			},
 			"alert": schema.BoolAttribute{
-				Description: "Whether this event definition triggers alerts.",
+				MarkdownDescription: "Whether this event definition triggers alerts.",
 				Computed:    true,
 			},
 			"state": schema.StringAttribute{
-				Description: "The state of the event definition (e.g., ENABLED, DISABLED).",
+				MarkdownDescription: "The state of the event definition (e.g., `ENABLED`, `DISABLED`).",
 				Computed:    true,
 			},
 			"updated_at": schema.StringAttribute{
-				Description: "The timestamp when the event definition was last updated.",
+				MarkdownDescription: "The timestamp when the event definition was last updated.",
 				Computed:    true,
 			},
 			"matched_at": schema.StringAttribute{
-				Description: "The timestamp when the event definition was last matched.",
+				MarkdownDescription: "The timestamp when the event definition was last matched.",
 				Computed:    true,
 			},
 		},

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"graylog-kaizen-provider/graylog/client"
+	"terraform-provider-graylog/graylog/client"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -59,20 +59,20 @@ func (d *eventNotificationDataSource) Metadata(_ context.Context, req datasource
 // Schema defines the schema for the data source.
 func (d *eventNotificationDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Fetches information about a specific Graylog event notification.",
+		MarkdownDescription: "Fetches information about a specific Graylog event notification.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "The unique identifier of the event notification. Either 'id' or 'title' must be provided.",
+				MarkdownDescription: "The unique identifier of the event notification. Either `id` or `title` must be provided.",
 				Optional:    true,
 				Computed:    true,
 			},
 			"title": schema.StringAttribute{
-				Description: "The title of the event notification. Either 'id' or 'title' must be provided.",
+				MarkdownDescription: "The title of the event notification. Either `id` or `title` must be provided.",
 				Optional:    true,
 				Computed:    true,
 			},
 			"description": schema.StringAttribute{
-				Description: "The description of the event notification.",
+				MarkdownDescription: "The description of the event notification.",
 				Computed:    true,
 			},
 		},
