@@ -6,6 +6,7 @@ import (
 
     "graylog-kaizen-provider/graylog/client"
     graylogds "graylog-kaizen-provider/graylog/datasource"
+    graylogres "graylog-kaizen-provider/graylog/resource"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/path"
     "github.com/hashicorp/terraform-plugin-framework/provider"
@@ -178,6 +179,15 @@ func (p *graylogProvider) Configure(ctx context.Context, req provider.ConfigureR
         api_version = config.APIVersion.ValueString()
     }
 
+    // Apply default values for optional fields
+    if x_requested_by == "" {
+        x_requested_by = "terraform-provider-graylog"
+    }
+
+    if api_version == "" {
+        api_version = "v3"
+    }
+
     // If any of the expected configurations are missing, return
     // errors with provider-specific guidance.
 
@@ -207,26 +217,6 @@ func (p *graylogProvider) Configure(ctx context.Context, req provider.ConfigureR
             "Missing Graylog API Auth Password",
             "The provider cannot create the Graylog API client as there is a missing or empty value for the Graylog API auth password. "+
                 "Set the auth_password value in the configuration or use the GRAYLOG_AUTH_PASSWORD environment variable. "+
-                "If either is already set, ensure the value is not empty.",
-        )
-    }
-
-    if x_requested_by == "" {
-        resp.Diagnostics.AddAttributeError(
-            path.Root("x_requested_by"),
-            "Missing Graylog API X-Requested-By",
-            "The provider cannot create the Graylog API client as there is a missing or empty value for the Graylog API X-Requested-By. "+
-                "Set the x_requested_by value in the configuration or use the GRAYLOG_X_REQUESTED_BY environment variable. "+
-                "If either is already set, ensure the value is not empty.",
-        )
-    }
-
-    if api_version == "" {
-        resp.Diagnostics.AddAttributeError(
-            path.Root("api_version"),
-            "Missing Graylog API Version",
-            "The provider cannot create the Graylog API client as there is a missing or empty value for the Graylog API version. "+
-                "Set the api_version value in the configuration or use the GRAYLOG_API_VERSION environment variable. "+
                 "If either is already set, ensure the value is not empty.",
         )
     }
@@ -280,5 +270,10 @@ func (p *graylogProvider) DataSources(_ context.Context) []func() datasource.Dat
 
 // Resources defines the resources implemented in the provider.
 func (p *graylogProvider) Resources(_ context.Context) []func() resource.Resource {
-    return nil
+    return []func() resource.Resource{
+        graylogres.NewEventDefinitionResource,
+        graylogres.NewEventNotificationResource,
+        graylogres.NewIndexSetResource,
+        graylogres.NewInputResource,
+    }
 }
